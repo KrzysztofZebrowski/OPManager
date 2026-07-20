@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#2563eb">
+    <title>OP Manager</title>
+    
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="OP Manager">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
+</head>
+<body>
+
+    <!-- ================= WIDOK 1: AKTYWNA TRASA ================= -->
+    <div id="view-route" class="app-view">
+        <header class="header-panel nav-header route-header">
+            <h2 id="active-route-title">Wczytywanie...</h2>
+            <button class="btn-edit" onclick="goToEdit()">⚙️ Zarządzaj</button>
+        </header>
+
+        <div class="filters-container">
+            <div class="filters" id="filterContainer">
+                <button class="filter-btn active" data-filter="all">Wszystkie</button>
+                <button class="filter-btn" data-filter="apm">APM | POK</button>
+                <button class="filter-btn" data-filter="firma">Firmy</button>
+                <button class="filter-btn" data-filter="zwrot">Zwroty</button>
+            </div>
+        </div>
+
+        <main class="list-container">
+            <ul id="active-list" class="address-list">
+                <!-- Adresy: przeciąganie, odhaczanie -->
+            </ul>
+
+            <details class="completed-section">
+                <summary>Zrealizowane (<span id="completed-count">0</span>)</summary>
+                <ul id="completed-list" class="address-list completed"></ul>
+            </details>
+        </main>
+    </div>
+
+    <!-- ================= WIDOK 2: ZARZĄDZANIE TRASAMI I ADRESAMI ================= -->
+    <div id="view-edit" class="app-view hidden">
+        <header class="header-panel nav-header">
+            <button class="back-btn" onclick="goToActive()">❮ Gotowe</button>
+            <h2 style="font-size: 18px;">Edycja</h2>
+        </header>
+        
+        <div class="route-manager">
+            <div class="setting-row">
+                <div class="setting-info">
+                    <span class="setting-title">Nie wygaszaj ekranu</span>
+                    <span class="setting-desc">Blokuje gaszenie telefonu w trasie</span>
+                </div>
+                <button id="btn-wakelock" class="btn-permanent" onclick="toggleWakeLock()">
+                    Wł.
+                </button>
+            </div>
+            
+            <div class="route-select-row">
+                <select id="route-select" onchange="changeRoute(this.value)"></select>
+                <button class="btn-secondary" onclick="showAddRouteModal()" style="flex: initial; width: 60px; font-size: 24px; padding: 0;">+</button>
+            </div>
+        </div>
+
+        <div class="edit-actions">
+            <button id="btn-add-address" class="btn-primary" style="flex: 2;" onclick="showAddAddressModal()">+ Dodaj adresy</button>
+            <button class="btn-danger" style="flex: 1;" onclick="deleteCurrentRoute(this)">🗑️ Usuń trasę</button>
+        </div>
+
+        <div class="backup-actions">
+                <button class="btn-primary" onclick="exportRoutes()">Eksport trasy</button>
+                <button class="btn-primary" onclick="triggerImport()">Import trasy</button>
+                <input type="file" id="input-import-file" class="hidden" accept=".json" onchange="importRoutes(event)">
+        </div>
+
+        <main class="list-container">
+            <h3 class="section-title">Adresy w wybranej trasie:</h3>
+            <ul id="edit-address-list" class="address-list">
+                <!-- Adresy z przyciskiem usuwania -->
+            </ul>
+        </main>
+    </div>
+
+    <!-- ================= MODAL DODAWANIA TRASY ================= -->
+    <div id="modal-route" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Nowa trasa</h3>
+            <input type="text" id="input-route-name" placeholder="Nazwa (np. Wtorek - Grunwald)" autocomplete="off">
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeModals()">Anuluj</button>
+                <button class="btn-primary" onclick="saveNewRoute()">Utwórz</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL DODAWANIA ADRESU ================= -->
+    <div id="modal-address" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Dodaj adres</h3>
+            <input type="text" id="input-name" placeholder="Nazwa (np. Jan Kowalski, Żabka)" autocomplete="off">
+            
+            <select id="input-type">
+                <option value="apm">APM | POK</option>
+                <option value="firma">Firma</option>
+                <option value="zwrot">Zwrot (1 dzień)</option>
+            </select>
+            
+            <div style="position: relative;">
+                <input type="text" id="input-street" placeholder="Ulica i numer" autocomplete="off" oninput="filterSuggestions('street')">
+                <ul id="street-suggestions" class="custom-suggestions hidden"></ul>
+            </div>
+            
+            <div style="position: relative;">
+                <input type="text" id="input-city" placeholder="Miejscowość" autocomplete="off" oninput="filterSuggestions('city')">
+                <ul id="city-suggestions" class="custom-suggestions hidden"></ul>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeModals()">Anuluj</button>
+                <button class="btn-primary" onclick="saveNewAddress()">Zapisz</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL QR KODU ================= -->
+    <div id="modal-qr" class="modal-overlay hidden">
+        <div class="modal-content" style="align-items: center; text-align: center;">
+            <h3 id="qr-title" style="margin-bottom: 5px;">Nazwa</h3>
+            <div id="qrcode-container" style="margin: 20px 0; display: flex; justify-content: center;"></div>
+            <div class="modal-actions" style="width: 100%;">
+                <button class="btn-primary" onclick="closeModals()">Zamknij</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
