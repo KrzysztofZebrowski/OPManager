@@ -530,6 +530,26 @@ function deleteCurrentRoute(button) {
     }
 }
 
+// --- DODAWANIE ADRESU ---
+
+function selectAddressType(type) {
+    document.getElementById('input-type').value = type;
+    
+    let titleText = '';
+    if (type === 'apm') titleText = '📦 APM | POK';
+    if (type === 'firma') titleText = '🏢 Firma';
+    if (type === 'zwrot') titleText = '↩️ Zwrot';
+    
+    document.getElementById('step-2-title').textContent = `Nowy punkt: ${titleText}`;
+    document.getElementById('add-step-1').classList.add('hidden');
+    document.getElementById('add-step-2').classList.remove('hidden');
+}
+
+function backToStep1() {
+    document.getElementById('add-step-1').classList.remove('hidden');
+    document.getElementById('add-step-2').classList.add('hidden');
+}
+
 function saveNewAddress() {
     const name = document.getElementById('input-name').value.trim();
     const type = document.getElementById('input-type').value;
