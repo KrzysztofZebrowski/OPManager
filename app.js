@@ -1,4 +1,5 @@
 let routes = [];
+let openGroups = [];
 
 try {
     const saved = localStorage.getItem('kurier_routes_v6');
@@ -176,7 +177,6 @@ function createNodeElement(node) {
     if (node.type === 'single') return createAddressElement(node.address, false);
     
     const li = document.createElement('li');
-    li.className = `group-container ${node.type === 'city-group' ? 'city-container' : 'street-container'}`;
     
     const count = node.type === 'city-group' ? 
         node.children.reduce((acc, child) => acc + (child.type === 'single' ? 1 : child.children.length), 0) : 
@@ -185,6 +185,11 @@ function createNodeElement(node) {
     const title = node.type === 'city-group' ? `📍 ${node.city} (${count})` : `🛣️ ${node.street} (${count})`;
     const rawName = node.type === 'city-group' ? node.city : node.street;
     const safeName = rawName.replace(/"/g, '&quot;').replace(/'/g, "\\'");
+
+    const isCollapsed = openGroups.includes(rawName) ? '' : 'collapsed';
+    
+    li.className = `group-container ${isCollapsed} ${node.type === 'city-group' ? 'city-container' : 'street-container'}`;
+    li.dataset.groupName = rawName;
 
     li.innerHTML = `
         <div class="group-header">
@@ -296,7 +301,16 @@ function toggleDone(addrId) {
 
 function toggleGroup(button) {
     const container = button.closest('.group-container');
-    if (container) container.classList.toggle('collapsed');
+    if (container) {
+        container.classList.toggle('collapsed');
+        
+        const groupName = container.dataset.groupName;
+        if (container.classList.contains('collapsed')) {
+            openGroups = openGroups.filter(name => name !== groupName);
+        } else {
+            if (!openGroups.includes(groupName)) openGroups.push(groupName);
+        }
+    }
 }
 
 document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -530,6 +544,28 @@ function deleteCurrentRoute(button) {
     }
 }
 
+// --- FUNKCJA POWIADOMIENIA TOAST ---
+let toastTimeout;
+
+function showToast(message) {
+    const toast = document.getElementById('toast-success');
+    if (!toast) return;
+    
+    toast.className = 'toast';
+
+    void toast.offsetWidth;
+
+    toast.textContent = message;
+    toast.classList.add('show');
+    
+    clearTimeout(toastTimeout);
+    
+    // Po 2.5 sekundach zamknij
+    toastTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+    }, 2500);
+}
+
 // --- DODAWANIE ADRESU ---
 
 function selectAddressType(type) {
@@ -560,9 +596,22 @@ function saveNewAddress() {
 
     const route = getCurrentRoute();
     route.addresses.push({ id: Date.now(), name: name, type: type, street: street, city: city, done: false });
+    
     saveData();
+    
+    document.getElementById('input-name').value = '';
+    document.getElementById('input-street').value = '';
+    document.getElementById('input-city').value = '';
+    backToStep1();
+
     renderEdit();
+    if (typeof renderActiveRoute === 'function') renderActiveRoute();
+    
     closeModals();
+
+    if (navigator.vibrate) navigator.vibrate(20);
+
+    showToast("✅ Adres dodany pomyślnie!");
 }
 
 let deleteAddrTimeout = null;

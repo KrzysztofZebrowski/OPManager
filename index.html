@@ -75,7 +75,7 @@
 
         <div class="edit-actions">
             <button id="btn-add-address" class="btn-primary" style="flex: 2;" onclick="showAddAddressModal()">+ Dodaj adresy</button>
-            <button class="btn-danger" style="flex: 1;" onclick="deleteCurrentRoute(this)">🗑️ Usuń trasę</button>
+            <button class="btn-danger" style="flex: 1;" onclick="deleteCurrentRoute(this)">Usuń trasę</button>
         </div>
 
         <div class="backup-actions">
@@ -107,29 +107,45 @@
     <!-- ================= MODAL DODAWANIA ADRESU ================= -->
     <div id="modal-address" class="modal-overlay hidden">
         <div class="modal-content">
-            <h3>Dodaj adres</h3>
-            <input type="text" id="input-name" placeholder="Nazwa (np. Jan Kowalski, Żabka)" autocomplete="off">
             
-            <select id="input-type">
-                <option value="apm">APM | POK</option>
-                <option value="firma">Firma</option>
-                <option value="zwrot">Zwrot (1 dzień)</option>
-            </select>
-            
-            <div style="position: relative;">
-                <input type="text" id="input-street" placeholder="Ulica i numer" autocomplete="off" oninput="filterSuggestions('street')">
-                <ul id="street-suggestions" class="custom-suggestions hidden"></ul>
-            </div>
-            
-            <div style="position: relative;">
-                <input type="text" id="input-city" placeholder="Miejscowość" autocomplete="off" oninput="filterSuggestions('city')">
-                <ul id="city-suggestions" class="custom-suggestions hidden"></ul>
+            <div id="add-step-1">
+                <h3>Wybierz rodzaj punktu</h3>
+                <div class="type-grid">
+                    <button class="type-btn type-apm" onclick="selectAddressType('apm')">📦 APM | POK</button>
+                    <button class="type-btn type-firmy" onclick="selectAddressType('firma')">🏢 Firma</button>
+                    <button class="type-btn type-zwroty" onclick="selectAddressType('zwrot')">↩️ Zwrot</button>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-secondary" onclick="closeModals()">Anuluj</button>
+                </div>
             </div>
 
-            <div class="modal-actions">
-                <button class="btn-secondary" onclick="closeModals()">Anuluj</button>
-                <button class="btn-primary" onclick="saveNewAddress()">Zapisz</button>
-            </div>
+            <div id="add-step-2" class="hidden">
+                <h3 id="step-2-title">Dodaj adres</h3>
+            
+                <select id="input-type" class="hidden">
+                    <option value="apm">APM | POK</option>
+                    <option value="firma">Firma</option>
+                    <option value="zwrot">Zwrot (1 dzień)</option>
+                </select>
+                
+                <input type="text" id="input-name" placeholder="Nazwa (to będzie w QR)" autocomplete="off">
+                
+                <div style="position: relative;">
+                    <input type="text" id="input-street" placeholder="Ulica i numer" autocomplete="off" oninput="filterSuggestions('street')">
+                    <ul id="street-suggestions" class="custom-suggestions hidden"></ul>
+                </div>
+                
+                <div style="position: relative;">
+                    <input type="text" id="input-city" placeholder="Miejscowość" autocomplete="off" oninput="filterSuggestions('city')">
+                    <ul id="city-suggestions" class="custom-suggestions hidden"></ul>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="btn-secondary" onclick="backToStep1()">❮ Wróć</button>
+                    <button class="btn-primary" onclick="saveNewAddress()">Zapisz</button>
+                </div>
+            </div>       
         </div>
     </div>
 
@@ -145,5 +161,8 @@
     </div>
 
     <script src="app.js"></script>
+        
+    <!-- ================= TOAST ================= -->
+    <div id="toast-success" class="toast">✅ Adres dodany pomyślnie!</div>
 </body>
 </html>
