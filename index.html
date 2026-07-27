@@ -66,12 +66,25 @@
                     <span class="slider"></span>
                 </label>
             </div>
+
+            <!-- Przycisk aktualizacji PWA -->
+            <div class="setting-row">
+                <div class="setting-info">
+                    <span class="setting-title">Wersja aplikacji</span>
+                    <span class="setting-desc">Wymuś pobranie najnowszych poprawek</span>
+                </div>
+                <button class="btn-secondary" style="padding: 6px 12px; font-size: 13px; flex: initial;" onclick="forceUpdatePWA()">
+                    🔄 Aktualizuj
+                </button>
+            </div>
             
             <div class="route-select-row">
                 <select id="route-select" onchange="changeRoute(this.value)"></select>
                 <button class="btn-secondary" onclick="showAddRouteModal()" style="flex: initial; width: 60px; font-size: 24px; padding: 0;">+</button>
             </div>
         </div>
+
+        
 
         <div class="edit-actions">
             <button id="btn-add-address" class="btn-primary" style="flex: 2;" onclick="showAddAddressModal()">+ Dodaj adresy</button>

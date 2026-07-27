@@ -364,7 +364,7 @@ function renderEdit() {
         list.appendChild(li);
     });
 
-    upddateWakeLockUI();
+    updateWakeLockUI();
 }
 
 function changeRoute(newId) {
@@ -777,6 +777,39 @@ if ('serviceWorker' in navigator) {
             .then(reg => console.log('✅ PWA gotowe (Service Worker aktywny):', reg.scope))
             .catch(err => console.error('❌ Błąd rejestracji PWA:', err));
     });
+}
+
+// --- RĘCZNA AKTUALIZACJA PWA ---
+async function forceUpdatePWA() {
+    if ('serviceWorker' in navigator) {
+        showToast("⏳ Wyszukiwanie aktualizacji...");
+        
+        try {
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (let reg of registrations) {
+                await reg.update();
+            }
+            
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                for (let name of cacheNames) {
+                    await caches.delete(name);
+                }
+            }
+            
+            showToast("✅ Pobrano nową wersję! Przeładowuję...");
+            setTimeout(() => {
+                window.location.reload(true);
+            }, 1500);
+            
+        } catch (error) {
+            console.error("Błąd podczas aktualizacji PWA:", error);
+            showToast("⚠️ Nie udało się zaktualizować. Odświeżam...");
+            setTimeout(() => window.location.reload(), 1500);
+        }
+    } else {
+        window.location.reload(true);
+    }
 }
 
 // --- START APLIKACJI ---
