@@ -588,7 +588,10 @@ function releaseWakeLock() {
 }
 
 function toggleWakeLock() {
-    isWakeLockEnabled = !isWakeLockEnabled;
+    const switchInput = document.getElementById('switch-wakelock');
+    if (!switchInput) return;
+    
+    isWakeLockEnabled = switchInput.checked; 
     localStorage.setItem('kurier_wakelock_enabled', isWakeLockEnabled);
     
     if (isWakeLockEnabled) {
@@ -597,19 +600,13 @@ function toggleWakeLock() {
         releaseWakeLock();
     }
     
-    updateWakeLockUI();
     if (navigator.vibrate) navigator.vibrate(20);
 }
 
 function updateWakeLockUI() {
-    const btn = document.getElementById('btn-wakelock');
-    if (!btn) return;
-    if (isWakeLockEnabled) {
-        btn.classList.add('active');
-        btn.innerHTML = 'Wł.';
-    } else {
-        btn.classList.remove('active');
-        btn.innerHTML = 'Wył.';
+    const switchInput = document.getElementById('switch-wakelock');
+    if (switchInput) {
+        switchInput.checked = isWakeLockEnabled;
     }
 }
 

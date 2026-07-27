@@ -61,9 +61,10 @@
                     <span class="setting-title">Nie wygaszaj ekranu</span>
                     <span class="setting-desc">Blokuje gaszenie telefonu w trasie</span>
                 </div>
-                <button id="btn-wakelock" class="btn-permanent" onclick="toggleWakeLock()">
-                    Wł.
-                </button>
+                <label class="switch-container">
+                    <input type="checkbox" id="switch-wakelock" onchange="toggleWakeLock()">
+                    <span class="slider"></span>
+                </label>
             </div>
             
             <div class="route-select-row">
